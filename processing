@@ -1,0 +1,143 @@
+
+import processing.video.*;
+
+// Variable for capture device
+Capture video;
+// Previous Frame
+
+
+
+PImage bg;
+PImage prevFrame;
+// How different must a pixel be to be a "motion" pixel
+float threshold = 50;
+
+boolean videoToggle = true;
+float avgMotion;
+
+float maxMotion = 12;
+float maxRadius = 100;
+
+float radius;
+
+void setup() {
+  size(640,480);
+  // Using the default capture device
+  video = new Capture(this, width, height);
+  video.start();
+  // Create an empty image the same size as the video
+  prevFrame = createImage(video.width, video.height, RGB);
+  bg = loadImage("clueboard.jpg");
+
+  
+}
+
+// New frame available from camera
+void captureEvent(Capture video) {
+  // Save previous frame for motion detection!!
+  prevFrame.copy(video, 0, 0, video.width, video.height, 0, 0, video.width, video.height);
+  prevFrame.updatePixels();
+  video.read();
+}
+
+void draw() {
+  background(bg);
+
+
+  // Capture video
+  if (video.available()) {
+    // Save previous frame for motion detection!!
+    prevFrame.copy(video,0,0,video.width,video.height,0,0,video.width,video.height);
+    prevFrame.updatePixels();
+    video.read();
+  }
+
+  loadPixels();
+  video.loadPixels();
+  prevFrame.loadPixels();
+
+  // These are the variables we'll need to find the average X and Y
+  float sumX = 0;
+  float sumY = 0;
+  int motionCount = 0; 
+
+  // Begin loop to walk through every pixel
+  for (int x = 0; x < video.width; x++ ) {
+    for (int y = 0; y < video.height; y++ ) {
+      // What is the current color
+      color current = video.pixels[x+y*video.width];
+
+      // What is the previous color
+      color previous = prevFrame.pixels[x+y*video.width];
+
+      // Step 4, compare colors (previous vs. current)
+      float r1 = red(current); 
+      float g1 = green(current);
+      float b1 = blue(current);
+      float r2 = red(previous); 
+      float g2 = green(previous);
+      float b2 = blue(previous);
+
+      // Motion for an individual pixel is the difference between the previous color and current color.
+      float diff = dist(r1,g1,b1,r2,g2,b2);
+
+      // If it's a motion pixel add up the x's and the y's
+      if (diff > threshold) {
+        sumX += x;
+        sumY += y;
+        motionCount++;
+      }
+    }
+  }
+
+  // average location is total location divided by the number of motion pixels.
+  float avgX = sumX / motionCount; 
+  float avgY = sumY / motionCount; 
+
+  // Draw a circle based on average motion
+  smooth();
+  noStroke();
+  fill(0);
+  ellipse(avgX,avgY,16,16);
+  if(avgX>22 && avgX<170 && avgY>20 && avgY<136)
+{
+  println("The Ghost Fish is in the Kitchen!");
+}
+  if(avgX>225 && avgX<419 && avgY>45 && avgY<150)
+{
+  println("The Ghost Fish is in the Ball Room!");
+}
+  if(avgX>474 && avgX<622 && avgY>19 && avgY<114)
+{
+  println("The Ghost Fish is in the Conservatory!");
+}
+if(avgX>22 && avgX<225 && avgY>174 && avgY<300)
+{
+  println("The Ghost Fish is in the Dining Room!");
+}
+if(avgX>474 && avgX<622 && avgY>153 && avgY<246)
+{
+  println("The Ghost Fish is in the Billiard Room!");
+}
+if(avgX>448 && avgX<622 && avgY>265 && avgY<355)
+{
+  println("The Ghost Fish is in the Library!");
+}
+if(avgX>22 && avgX<195 && avgY>360 && avgY<474)
+{
+  println("The Ghost Fish is in the Lounge!");
+}
+if(avgX>250 && avgX<391 && avgY>342 && avgY<476)
+{
+  println("The Ghost Fish is in the Hall!");
+}
+if(avgX>447 && avgX<622 && avgY>399 && avgY<475)
+{
+  println("The Ghost Fish is in the Study!");
+}
+
+else
+{
+  println("The Ghost Fish is on the move!");
+}
+}
